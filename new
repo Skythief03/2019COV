@@ -1,0 +1,207 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#define LEN sizeof(struct building)
+#define SUM 25	//总栋数
+#define FLOOR 30	//楼层数
+#define DOOR 3	//门户数
+struct building 
+{
+	char name[21];
+	int stqk;
+	char phone[12];
+};
+struct building home[SUM][FLOOR][DOOR];
+void write(FILE* fpw);	//改写数据
+void scanmember();	//	查找人员信息
+void scanbuiding();	//查找某栋楼情况
+void scanll();	//查找感染者情况
+void read();	//读取全部数据
+void print();	//界面文本
+void structnew();	//初始化结构
+int main(void)
+{	
+	char choose;
+	int i, j, k;
+	FILE* fp;
+
+	fp = fopen("data.txt", "a+");
+	structnew();
+	for (i = 0; i < SUM; i++)
+	{
+		for (j = 0; j < FLOOR; j++)
+		{
+			for (k = 0; k < DOOR; k++)
+			{
+				fwrite(&home[i][j][k], LEN, 1, fp);
+			}
+		}
+	}
+	fclose(fp);	//数据写入
+	do
+	{
+		printf("\n");
+		print();
+		choose = getchar();
+		switch (choose)
+		{
+		case 'A':
+			write(fp);
+			break;
+		case 'B':
+			scanmember();
+			break;
+		case'C':
+			scanbuiding();
+			break;
+		case 'D':
+			scanll();
+			break;
+		case'E':
+			read();
+			break;
+		case 'F':
+			break;
+		}
+		choose = getchar();
+	} while (choose != 'F');	//若为F直接退出
+
+	return 0;
+}
+
+void write(FILE *fpw)
+{
+	int x, y, z;	//结构三维度
+	char chname[21];
+	int chstqk;
+	char chphone[12];
+	int place;
+
+	printf("正在执行改写操作：\n");
+	printf("请输入目标楼号：");
+	scanf("%d",&x);
+	printf("\n请输入目标层数");
+	scanf("%d", &y);
+	printf("\n请输入目标户号");
+	scanf("%d", &z);
+	place = ((x - 1) * FLOOR * DOOR + (y - 1) * DOOR + (z - 1)) * LEN;
+	fpw = fopen("data.txt", "r+");
+	fseek(fpw, place, SEEK_SET);
+	printf("\n请输入姓名：");
+	scanf("%s", chname);
+	strcpy(home[x-1][y-1][z-1].name, chname);
+	printf("\n请输入身体情况，正常为0 患病为1：");
+	scanf("%d", &chstqk);
+	home[x-1][y-1][z-1].stqk = chstqk;
+	printf("\n请输入电话号码：");
+	scanf("%s", chphone);
+	strcpy(home[x-1][y-1][z-1].phone, chphone);
+	fwrite(&home[x-1][y-1][z-1],LEN,1,fpw);
+	fclose(fpw);
+	printf("改写完成\n");
+	system("Pause");
+	printf("\n");
+}
+
+void scanmember()
+{
+	char find[20];
+	int i, j, k;
+	int i0, j0, k0;
+
+	printf("\n请输入要查找的人员姓名：");
+	scanf("%s", find);
+	for (i = 0; i < SUM; i++)
+	{
+		for (j = 0; j < FLOOR; j++)
+		{
+			for (k = 0; k < DOOR; k++)
+			{
+				if (strncmp(find, home[i][j][k].name, 20) == 0)
+				{
+					i0 = i;
+					j0 = j;
+					k0 = k;
+					printf("%s %d %s", home[i0][j0][k0].name, home[i0][j0][k0].stqk, home[i0][j0][k0].phone);
+				}
+			}
+		}
+	}
+	printf("\n");
+	system("Pause");
+}
+
+void scanbuiding()
+{
+	int x;
+	int r, t;
+
+	printf("请输入要查找的楼号");
+	scanf("%d", &x);
+	for(r=0;r<FLOOR;r++)
+		for (t = 0; t < DOOR; t++)
+		{
+			printf("第%d层 第%d户 %s %d %s", r+1, t+1, home[x-1][r][t].name, home[x-1][r][t].stqk, home[x-1][r][t].phone);
+			printf("\n");
+		}
+	system("Pause");
+}
+
+void scanll()
+{
+	int q, w, e;
+	for (q = 0; q < SUM; q++)
+	{
+		for (w = 0; w < FLOOR; w++)
+		{
+			for (e = 0; e < DOOR; e++)
+			{
+				if (home[q][w][e].stqk == 1)
+					printf("第%d栋 第%d层 第%d户 %s %s\n", q+1, w+1, e+1, home[q][w][e].name, home[q][w][e].phone);
+			}
+		}
+	}
+	printf("\n");
+	system("Pause");
+}
+
+void read()
+{
+	int b, n, m;
+	for (b = 0; b < SUM; b++)
+		for (n = 0; n < FLOOR; n++)
+			for (m = 0; m < DOOR; m++)
+				printf("第%d栋 第%d层 第%d户 %s %s\n", b+1, n+1, m+1, home[b][n][m].name, home[b][n][m].phone);
+	printf("\n");
+	system("Pause");
+}
+
+void print()
+{
+	printf("请输入要执行操作的序号\n");
+	printf("A) 改写数据\n");
+	printf("B) 查找人员信息\n");
+	printf("C）查找楼栋情况\n");
+	printf("D）查找感染者\n");
+	printf("E) 读取全部信息\n");
+	printf("F）退出系统\n");
+	printf("\n");
+}
+
+void structnew()
+{
+	int i, j, k;
+	for (i = 0; i < SUM; i++)
+	{
+		for (j = 0; j < FLOOR; j++)
+		{
+			for (k = 0; k < DOOR; k++)
+			{
+				strcpy(home[i][j][k].name,"none");
+				strcpy(home[i][j][k].phone, "none");
+				home[i][j][k].stqk = 0;
+			}
+		}
+	}
+}
